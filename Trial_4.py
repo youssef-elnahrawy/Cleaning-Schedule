@@ -7,7 +7,7 @@ from openpyxl.styles import PatternFill, Fill, Color #used to color cells
 from io import BytesIO
 
 # Set up streamlit app
-st.set_page_config(page_title="Airbnb Cleaning Schedule", layout="narrow")
+st.set_page_config(page_title="Airbnb Cleaning Schedule")
 st.title("Airbnb Cleaning Schedule")
 st.write("This app will help you create a cleaning schedule for your Airbnb property using a .ics file.")
 
