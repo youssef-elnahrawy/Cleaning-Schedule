@@ -1,6 +1,0 @@
-for col in range(2, 9):
-    for row in [5, 9, 13, 17, 21, 25, 29, 33]:
-        day = 0
-        cell = sheet.cell(row=row, column=col)
-        cell = date.today() + timedelta(days=day
-        day += 1)
