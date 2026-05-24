@@ -1,5 +1,6 @@
 # Imports
 import streamlit as st
+import requests
 from icalendar import Calendar #used to parse .ics file
 from openpyxl import load_workbook #used to read excel file
 from datetime import date, timedelta #used to get current date
@@ -9,9 +10,9 @@ from io import BytesIO
 # Set up streamlit app
 st.set_page_config(page_title="Airbnb Cleaning Schedule")
 st.title("Airbnb Cleaning Schedule")
-st.write("This app will help you create a cleaning schedule for your Airbnb property using a .ics file.")
+st.write("This app will help you create a cleaning schedule for your Airbnb property using an iCal link.")
 
-uploaded_file = st.file_uploader("Upload your .ics file:", type=["ics"])
+ical_url = st.text_input("Paste your iCal URL from Airbnb:")
 
 # Rest of normal code
 START_ROW = 41
@@ -37,8 +38,14 @@ wb = load_workbook(filename='template.xlsx')
 sheet = wb.active
 
 # Read the .ics file
-if uploaded_file is not None:
-    ics_content = uploaded_file.read()
+if ical_url:
+    try:
+        response = requests.get(ical_url, timeout=30)
+        response.raise_for_status()
+        ics_content = response.content
+    except requests.exceptions.RequestException:
+        st.error("Failed to fetch the iCal URL. Please check the link and try again.")
+        st.stop()
 
     # Parse the .ics file
     calendar = Calendar.from_ical(ics_content)
@@ -132,17 +139,16 @@ if uploaded_file is not None:
             cell.value = ""
     sheet.cell(row=SHEET_NAME_ROW, column=SHEET_NAME_COL).value = ""
 
+    output = BytesIO()
+    wb.save(output)
+
+    st.download_button(
+        label="Download Cleaning Schedule",
+        data=output.getvalue(),
+        file_name="calendario_de_limpieza.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
 else:
     st.write(" ")
-    st.error("Please upload a valid .ics file.")
-
-
-output = BytesIO()
-wb.save(output)
-
-st.download_button(
-    label="Download Cleaning Schedule",
-    data=output.getvalue(),
-    file_name="calendario_de_limpieza.xlsx",
-    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-)
+    st.error("Please paste a valid iCal URL.")
